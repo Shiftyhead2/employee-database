@@ -6,7 +6,7 @@ import sqlite3
 GENDER_OPTIONS:list[str] = ["Muško","Žensko"]
 CONTRACT_TYPES:list[str] = ["Određeno","Neodređeno"]
 
-class UserForm(Frame):
+class EmployeeForm(Frame):
   def __init__(self,master,controller):
     super().__init__(master)
 
@@ -113,29 +113,29 @@ class UserForm(Frame):
     self.submit_button.grid(row=24,column=0,sticky="N")
   
   def update_UI_accordingly(self) -> None:
-    conn = sqlite3.connect(self.controller.db_user_path)
-    cursor = conn.cursor()
+    with sqlite3.connect(self.controller.db_user_path) as conn:
+      cursor = conn.cursor()
 
-    try:
-      cursor.execute("SELECT * FROM employees WHERE id=?",(self.user_id,))
-    except sqlite3.Error as e:
-      messagebox.showerror("Greška!",f"Nešto je otišlo po zlu: {e}")
-    else:
-      self.employee = cursor.fetchone()
-      self.first_name_entry.delete(0,'end')
-      self.last_name_entry.delete(0,'end')
-      self.picture_entry.delete(0,'end')
-      self.gender_selection.set(GENDER_OPTIONS[0])
-      self.birth_year_entry.delete(0,'end')
-      self.start_date_entry.delete(0 , 'end')
-      self.contract_type_selection.set(CONTRACT_TYPES[0])
-      self.contract_duration_entry.delete(0,'end')
-      self.department_entry.delete(0,'end')
-      self.holiday_days_entry.delete(0,'end')
-      self.free_days_entry.delete(0,'end')
-      self.paid_leave_entry.delete(0,'end')
-    finally:
-      conn.close()
+      try:
+        cursor.execute("SELECT * FROM employees WHERE id=?",(self.user_id,))
+      except sqlite3.Error as e:
+        messagebox.showerror("Greška!",f"Nešto je otišlo po zlu: {e}")
+      else:
+        self.employee = cursor.fetchone()
+        self.first_name_entry.delete(0,'end')
+        self.last_name_entry.delete(0,'end')
+        self.picture_entry.delete(0,'end')
+        self.gender_selection.set(GENDER_OPTIONS[0])
+        self.birth_year_entry.delete(0,'end')
+        self.start_date_entry.delete(0 , 'end')
+        self.contract_type_selection.set(CONTRACT_TYPES[0])
+        self.contract_duration_entry.delete(0,'end')
+        self.department_entry.delete(0,'end')
+        self.holiday_days_entry.delete(0,'end')
+        self.free_days_entry.delete(0,'end')
+        self.paid_leave_entry.delete(0,'end')
+      finally:
+        cursor.close()
 
 
   

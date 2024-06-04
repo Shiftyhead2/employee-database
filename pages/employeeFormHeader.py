@@ -1,6 +1,6 @@
 from tkinter import Frame,Label,Button
 
-class UserFormHeader(Frame):
+class EmployeeFormHeader(Frame):
   def __init__(self,master,controller):
     super().__init__(master)
     self.master = master

@@ -2,8 +2,8 @@ from tkinter import *
 from tkinter import messagebox
 from typing import Any
 from pages.mainHeader import MainHeader
-from pages.userFormHeader import UserFormHeader
-from pages.userForm import UserForm
+from pages.employeeFormHeader import EmployeeFormHeader
+from pages.employeeForm import EmployeeForm
 import sqlite3
 import os
 import shutil
@@ -27,8 +27,8 @@ class App:
 
     self.pages:dict[str,Any] = {
       "MainHeader": MainHeader(self.root,self),
-      "UserFormHeader":UserFormHeader(self.root,self),
-      "UserForm":UserForm(self.root,self)
+      "UserFormHeader":EmployeeFormHeader(self.root,self),
+      "UserForm":EmployeeForm(self.root,self)
     }
 
     self.current_pages:list[Any] = []
@@ -62,29 +62,27 @@ class App:
     self.switch_to_page("UserFormHeader","UserForm")
 
   def create_user_table(self) -> None:
-    conn = sqlite3.connect(self.db_user_path)
-    cursor = conn.cursor()
-
-    cursor.execute('''
-            CREATE TABLE IF NOT EXISTS employees(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                ime TEXT,
-                prezime TEXT,
-                slika TEXT,
-                spol TEXT,
-                godinaRođenja TEXT,
-                početakRada TEXT,
-                vrstaUgovora TEXT,
-                trajanjeUgovora INT,
-                odjel TEXT,
-                daniGodišnjegOdmora INT,
-                slobodniDani INT,
-                danPlaćenogDopusta INT         
-            )  
-        ''')
-    
-    conn.commit()
-    conn.close()
+     with sqlite3.connect(self.db_user_path) as conn:
+          cursor = conn.cursor()
+          cursor.execute('''
+                CREATE TABLE IF NOT EXISTS employees(
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ime TEXT,
+                    prezime TEXT,
+                    slika TEXT,
+                    spol TEXT,
+                    godinaRođenja TEXT,
+                    početakRada TEXT,
+                    vrstaUgovora TEXT,
+                    trajanjeUgovora INT,
+                    odjel TEXT,
+                    daniGodišnjegOdmora INT,
+                    slobodniDani INT,
+                    danPlaćenogDopusta INT         
+                )
+            ''')
+          cursor.close()  
+          conn.commit()  
   
   def create_or_update_user(self,first_name: str,last_name: str ,picture_path: str,gender: str,birth_year: str,start_date :str ,contract_type :str,contract_duration:str,holiday_days:str,free_days:str,paid_leave:str,department:str) -> None:
     if not first_name or not last_name or not picture_path or not gender or not birth_year or not start_date or not contract_type or not contract_duration or not holiday_days or not free_days or not paid_leave or not department:
@@ -105,24 +103,23 @@ class App:
       messagebox.showerror("Dodavanje korisnika nije uspjelo!", "Molimo Vas da provjerite sve podatke!")
       return
     
-
-    conn = sqlite3.connect(self.db_user_path)
-    cursor = conn.cursor()
-
-    try:
-      cursor.execute('''
+    with sqlite3.connect(self.db_user_path) as conn:
+      cursor = conn.cursor()
+      try:
+        cursor.execute('''
                     INSERT INTO employees(ime,prezime,slika,spol,godinaRođenja,početakRada,vrstaUgovora,trajanjeUgovora,odjel,daniGodišnjegOdmora,slobodniDani,danPlaćenogDopusta)
                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
                     ''', (first_name,last_name,self.save_image_locally(picture_path,first_name,last_name),gender,int(birth_year),start_date,contract_type,int(contract_duration),department,int(holiday_days),int(free_days),int(paid_leave)))
-    except sqlite3.Error as e:
-      messagebox.showerror("Greška!", f"Nešto je pošlo po zlu:{e}")
-      return
-    else:
-      messagebox.showinfo("Uspjeh!", "Uspješno ste dodali zaposlenika!")
+      except sqlite3.Error as e:
+        messagebox.showerror("Greška!", f"Nešto je pošlo po zlu:{e}")
+        cursor.close()
+        return
+      else:
+        messagebox.showinfo("Uspjeh!", "Uspješno ste dodali zaposlenika!")
+      finally:
+        cursor.close()
+        conn.commit()
     
-    conn.commit()
-    conn.close()
-
     self.switch_to_users_view()
     
   
