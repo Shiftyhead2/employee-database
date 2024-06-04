@@ -12,7 +12,7 @@ class UserFormHeader(Frame):
 
     self.pack_widgets()
 
-  def pack_widgets(self):
+  def pack_widgets(self) -> None:
     self.grid_columnconfigure(0, weight=1)
     self.grid_columnconfigure(2, weight=1)
 
@@ -21,8 +21,8 @@ class UserFormHeader(Frame):
     self.back_button.grid(row = 0, column= 3 , sticky= "E" , padx=10)
   
 
-  def show(self,user_id = 0):
+  def show(self,user_id = 0) -> None:
     self.grid(sticky="NSEW")
   
-  def hide(self):
+  def hide(self) -> None:
     self.grid_remove()
