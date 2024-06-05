@@ -19,7 +19,7 @@ class MainHeader(Frame):
     self.title_label.grid(row=0, column=1)
   
 
-  def show(self,user_id: int = 0) -> None:
+  def show(self,employee_id: int = 0) -> None:
     self.grid(sticky="NSEW")
   
   def hide(self) -> None:

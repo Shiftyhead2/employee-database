@@ -14,7 +14,7 @@ class EmployeeForm(Frame):
     self.master = master
     self.controller = controller
 
-    self.user_id:int = 0
+    self.employee_id:int = 0
     self.employee = None
 
     self.first_name_label = Label(self,text = "Ime")
@@ -61,10 +61,10 @@ class EmployeeForm(Frame):
 
 
 
-  def show(self,user_id: int = 0) -> None:
+  def show(self,employee_id: int = 0) -> None:
     self.master.update_idletasks()
     self.place(relx=0.5, rely=0.5,anchor="center")
-    self.user_id = user_id
+    self.employee_id = employee_id
     self.update_UI_accordingly()
 
   def hide(self) -> None:
@@ -114,14 +114,13 @@ class EmployeeForm(Frame):
     self.submit_button.grid(row=24,column=0,sticky="N",pady=10)
   
   def update_UI_accordingly(self) -> None:
-    with sqlite3.connect(self.controller.db_user_path) as conn:
+    with sqlite3.connect(self.controller.db_employee_path) as conn:
       cursor = conn.cursor()
 
       try:
-        cursor.execute("SELECT * FROM employees WHERE id=?",(self.user_id,))
+        cursor.execute("SELECT * FROM employees WHERE id=?",(self.employee_id,))
       except sqlite3.Error as e:
         display_error_message("Greška!",f"Nešto je otišlo po zlu: {e}")
-        cursor.close()
         return
       else:
         self.employee = cursor.fetchone()
@@ -137,7 +136,8 @@ class EmployeeForm(Frame):
         self.holiday_days_entry.delete(0,'end')
         self.free_days_entry.delete(0,'end')
         self.paid_leave_entry.delete(0,'end')
-        self.submit_button.config(text="Napravi zaposlenika")
+        self.submit_button.configure(text="Napravi zaposlenika")
+        self.first_name_entry.focus()
         if self.employee is not None:
           self.first_name_entry.insert(0,self.employee[1])
           self.last_name_entry.insert(0,self.employee[2])
@@ -151,9 +151,7 @@ class EmployeeForm(Frame):
           self.holiday_days_entry.insert(0,self.employee[10])
           self.free_days_entry.insert(0,self.employee[11])
           self.paid_leave_entry.insert(0,self.employee[12])
-          self.submit_button.config(text="Ažuriraj zaposlenika")
-      finally:
-        cursor.close()
+          self.submit_button.configure(text="Ažuriraj zaposlenika")
 
 
   
@@ -194,4 +192,4 @@ class EmployeeForm(Frame):
     free_days:str = self.free_days_entry.get()
     paid_leave:str = self.paid_leave_entry.get()
 
-    self.controller.create_or_update_user(first_name,last_name,picture_path,gender,birth_year,start_date,contract_type,contract_duration,holiday_days,free_days,paid_leave,department)
+    self.controller.create_or_update_employee(first_name,last_name,picture_path,gender,birth_year,start_date,contract_type,contract_duration,holiday_days,free_days,paid_leave,department)
