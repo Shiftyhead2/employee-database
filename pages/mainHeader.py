@@ -1,4 +1,4 @@
-from tkinter import Frame,Label,Button
+from tkinter import Frame,Label
 
 class MainHeader(Frame):
   def __init__(self,master,controller):
@@ -8,7 +8,6 @@ class MainHeader(Frame):
 
     self.header_label = Label(self, bg = "lightgray", height= 2)
     self.title_label = Label(self,text = "Baza podataka zaposlenika", bg= "lightgray")
-    self.createUser_button = Button(self, text = "Novi Zaposlenik", command= self.controller.switch_to_user_form)
 
     self.pack_widgets()
 
@@ -18,7 +17,6 @@ class MainHeader(Frame):
 
     self.header_label.grid(row=0, column=0, columnspan=5, sticky="NSEW")
     self.title_label.grid(row=0, column=1)
-    self.createUser_button.grid(row = 0, column= 3 , sticky= "E" , padx=10)
   
 
   def show(self,user_id: int = 0) -> None:

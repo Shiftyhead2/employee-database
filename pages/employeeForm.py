@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import Frame,Label,Entry,Button,ttk, filedialog,messagebox
+from tkinter import Frame,Label,Entry,Button,ttk, filedialog
 from tkcalendar import *
+from handlers.messageHandler import display_error_message
 import sqlite3
 
 GENDER_OPTIONS:list[str] = ["Muško","Žensko"]
@@ -16,10 +17,10 @@ class EmployeeForm(Frame):
     self.user_id:int = 0
     self.employee = None
 
-    self.first_name_label = Label(self,text = "Ime:")
+    self.first_name_label = Label(self,text = "Ime")
     self.first_name_entry = Entry(self,width=25)
 
-    self.last_name_label = Label(self,text = "Prezime:")
+    self.last_name_label = Label(self,text = "Prezime")
     self.last_name_entry = Entry(self, width= 25)
 
     self.picture_label = Label(self,text = "Slika")
@@ -29,32 +30,32 @@ class EmployeeForm(Frame):
     self.gender_label = Label(self,text = "Spol")
     self.gender_selection = ttk.Combobox(self,state="readonly",values= GENDER_OPTIONS)
 
-    self.birth_year_label = Label(self,text = "Godina rođenja:")
+    self.birth_year_label = Label(self,text = "Godina rođenja")
     self.birth_year_entry = Entry(self,width= 25)
     
-    self.start_date_label = Label(self,text = "Početak Rada:")
+    self.start_date_label = Label(self,text = "Početak Rada")
     self.start_date_entry = Entry(self,width= 25)
     self.start_date_button = Button(self,text = "Odaberi datum" , command= self.pick_date)
 
-    self.contract_type_label = Label(self,text = "Vrsta ugovora:")
+    self.contract_type_label = Label(self,text = "Vrsta ugovora")
     self.contract_type_selection = ttk.Combobox(self,state="readonly",values= CONTRACT_TYPES)
 
-    self.contract_duration_label = Label(self,text = "Trajanje ugovora:")
+    self.contract_duration_label = Label(self,text = "Trajanje ugovora")
     self.contract_duration_entry = Entry(self, width= 25)
 
-    self.department_label = Label(self,text = "Odjel:")
+    self.department_label = Label(self,text = "Odjel")
     self.department_entry = Entry(self,width=25)
 
-    self.holiday_days_label = Label(self,text = "Broj dana godišnjeg odmora:")
+    self.holiday_days_label = Label(self,text = "Broj dana godišnjeg odmora")
     self.holiday_days_entry = Entry(self,width= 25)
 
-    self.free_days_label = Label(self,text = "Broj slobodnih dana:")
+    self.free_days_label = Label(self,text = "Broj slobodnih dana")
     self.free_days_entry = Entry(self,width=25)
 
-    self.paid_leave_label = Label(self,text="Broj plaćenog dopusta:")
+    self.paid_leave_label = Label(self,text="Broj plaćenog dopusta")
     self.paid_leave_entry = Entry(self,width=25)
 
-    self.submit_button = Button(self,text = "Napravi zaposlenika", command= self.submit_data)
+    self.submit_button = Button(self, command= self.submit_data)
 
     self.pack_widgets()
 
@@ -110,7 +111,7 @@ class EmployeeForm(Frame):
     self.paid_leave_label.grid(row=22,column=0,sticky="N")
     self.paid_leave_entry.grid(row=23,column=0,sticky="N")
 
-    self.submit_button.grid(row=24,column=0,sticky="N")
+    self.submit_button.grid(row=24,column=0,sticky="N",pady=10)
   
   def update_UI_accordingly(self) -> None:
     with sqlite3.connect(self.controller.db_user_path) as conn:
@@ -119,7 +120,9 @@ class EmployeeForm(Frame):
       try:
         cursor.execute("SELECT * FROM employees WHERE id=?",(self.user_id,))
       except sqlite3.Error as e:
-        messagebox.showerror("Greška!",f"Nešto je otišlo po zlu: {e}")
+        display_error_message("Greška!",f"Nešto je otišlo po zlu: {e}")
+        cursor.close()
+        return
       else:
         self.employee = cursor.fetchone()
         self.first_name_entry.delete(0,'end')
@@ -134,6 +137,21 @@ class EmployeeForm(Frame):
         self.holiday_days_entry.delete(0,'end')
         self.free_days_entry.delete(0,'end')
         self.paid_leave_entry.delete(0,'end')
+        self.submit_button.config(text="Napravi zaposlenika")
+        if self.employee is not None:
+          self.first_name_entry.insert(0,self.employee[1])
+          self.last_name_entry.insert(0,self.employee[2])
+          self.picture_entry.insert(0,self.employee[3])
+          self.gender_selection.set(self.employee[4])
+          self.birth_year_entry.insert(0,self.employee[5])
+          self.start_date_entry.insert(0,self.employee[6])
+          self.contract_type_selection.set(self.employee[7])
+          self.contract_duration_entry.insert(0,self.employee[8])
+          self.department_entry.insert(0,self.employee[9])
+          self.holiday_days_entry.insert(0,self.employee[10])
+          self.free_days_entry.insert(0,self.employee[11])
+          self.paid_leave_entry.insert(0,self.employee[12])
+          self.submit_button.config(text="Ažuriraj zaposlenika")
       finally:
         cursor.close()
 

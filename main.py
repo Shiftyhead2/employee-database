@@ -1,9 +1,11 @@
 from tkinter import *
-from tkinter import messagebox
 from typing import Any
 from pages.mainHeader import MainHeader
 from pages.employeeFormHeader import EmployeeFormHeader
 from pages.employeeForm import EmployeeForm
+from pages.employeesView import EmployeesView
+from helpers.helpersFunctions import *
+from handlers.messageHandler import *
 import sqlite3
 import os
 import shutil
@@ -28,7 +30,8 @@ class App:
     self.pages:dict[str,Any] = {
       "MainHeader": MainHeader(self.root,self),
       "UserFormHeader":EmployeeFormHeader(self.root,self),
-      "UserForm":EmployeeForm(self.root,self)
+      "UserForm":EmployeeForm(self.root,self),
+      "EmployeesView": EmployeesView(self.root,self)
     }
 
     self.current_pages:list[Any] = []
@@ -52,10 +55,10 @@ class App:
       for page in self.current_pages:
         page.show(self.user_id)
     else:
-      messagebox.showerror("Error", f"One or more pages could not be found: {page_names}")
+      display_error_message("Greška!",f"Jedna ili više stranica nisu se mogle naći:{page_names}")
   
   def switch_to_users_view(self) -> None:
-    self.switch_to_page("MainHeader")
+    self.switch_to_page("MainHeader", "EmployeesView")
     self.user_id = 0
   
   def switch_to_user_form(self) -> None:
@@ -71,36 +74,30 @@ class App:
                     prezime TEXT,
                     slika TEXT,
                     spol TEXT,
-                    godinaRođenja TEXT,
+                    godinaRođenja INTEGER,
                     početakRada TEXT,
                     vrstaUgovora TEXT,
-                    trajanjeUgovora INT,
+                    trajanjeUgovora INTEGER,
                     odjel TEXT,
-                    daniGodišnjegOdmora INT,
-                    slobodniDani INT,
-                    danPlaćenogDopusta INT         
+                    daniGodišnjegOdmora INTEGER,
+                    slobodniDani INTEGER,
+                    danPlaćenogDopusta INTEGER         
                 )
             ''')
           cursor.close()  
           conn.commit()  
   
   def create_or_update_user(self,first_name: str,last_name: str ,picture_path: str,gender: str,birth_year: str,start_date :str ,contract_type :str,contract_duration:str,holiday_days:str,free_days:str,paid_leave:str,department:str) -> None:
-    if not first_name or not last_name or not picture_path or not gender or not birth_year or not start_date or not contract_type or not contract_duration or not holiday_days or not free_days or not paid_leave or not department:
-      messagebox.showerror("Dodavanje korisnika nije uspjelo!", "Molimo Vas da unesete sve podatke!")
+    if not checkIfNotEmpty(first_name,last_name,picture_path,gender,birth_year,start_date,contract_type,contract_duration,holiday_days,free_days,paid_leave,department):
+      display_error_message("Dodavanje korisnika nije uspjelo!","Molimo Vas da unesete sve podatke!")
       return
     
-    if first_name.isalpha() == False or last_name.isalpha() == False:
-      messagebox.showerror("Dodavanje korisnika nije uspjelo!", "Molimo Vas da točno unesete ime i prezime!")
+    if not checkIfNoNumbers(first_name,last_name):
+      display_error_message("Dodavanje korisnika nije uspjelo!", "Molimo Vas da točno unesete ime i prezime!")
       return
     
-    try:
-      int(birth_year)
-      int(contract_duration)
-      int(holiday_days)
-      int(free_days)
-      int(paid_leave)
-    except ValueError:
-      messagebox.showerror("Dodavanje korisnika nije uspjelo!", "Molimo Vas da provjerite sve podatke!")
+    if not checkIfInt(birth_year,contract_duration,holiday_days,free_days,paid_leave):
+      display_error_message("Dodavanje korisnika nije uspjelo!", "Molimo Vas da točno unesete ime i prezime!")
       return
     
     with sqlite3.connect(self.db_user_path) as conn:
@@ -111,11 +108,11 @@ class App:
                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
                     ''', (first_name,last_name,self.save_image_locally(picture_path,first_name,last_name),gender,int(birth_year),start_date,contract_type,int(contract_duration),department,int(holiday_days),int(free_days),int(paid_leave)))
       except sqlite3.Error as e:
-        messagebox.showerror("Greška!", f"Nešto je pošlo po zlu:{e}")
+        display_error_message("Greška!", f"Nešto je pošlo po zlu:{e}")
         cursor.close()
         return
       else:
-        messagebox.showinfo("Uspjeh!", "Uspješno ste dodali zaposlenika!")
+        display_info_message("Uspjeh!", "Uspješno ste dodali zaposlenika!")
       finally:
         cursor.close()
         conn.commit()
