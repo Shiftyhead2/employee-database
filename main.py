@@ -109,7 +109,6 @@ class App:
       display_error_message("Dodavanje korisnika nije uspjelo!", "Molimo Vas da točno unesete ime i prezime!")
       return
     
-    print(self.employee_id)
     
     with sqlite3.connect(self.db_employee_path) as conn:
       cursor = conn.cursor()
@@ -154,6 +153,9 @@ class App:
           pass
 
       return file_path
+  
+
+
 
   
 

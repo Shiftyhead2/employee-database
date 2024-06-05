@@ -14,7 +14,7 @@ class EmployeeView(Frame):
     self.employee = None
 
     self.name_label = Label(self, text= "Ime i prezime")
-    self.employee_picture = Label(self, text= "Slika")
+    self.employee_picture = Label(self)
     self.gender_label = Label(self, text="Spol")
     self.birth_year_label = Label(self,text="Godina rođenja")
     self.start_date_label = Label(self,text="Početak rada")
@@ -89,23 +89,27 @@ class EmployeeView(Frame):
 
         image_path = self.employee[3]
         try:
-          image = Image.open(image_path)
-          image.verify()
-          image = Image.open(image_path)
+            image = Image.open(image_path)
+            image.verify()
+            image = Image.open(image_path)
         except FileNotFoundError as e:
           display_error_message("Greška!", f"Nismo mogli naći sliku na ovoj putanji {image_path}")
+          return
         except IOError as e:
           display_error_message("Greška!", f"Nismo mogli naći sliku na ovoj putanji {image_path}")
+          return
         except Exception as e:
           display_error_message("Greška!", f"Neočekivana greška: {e}")
+          return
         else:
-          image = image.resize((150, 150))
-          photo = ImageTk.PhotoImage(image)
-          self.employee_picture.config(image=photo)
-          self.employee_picture.image = photo  
+            image = image.resize((150, 150))
+            photo = ImageTk.PhotoImage(image)
+            self.employee_picture.config(image=photo)
+            self.employee_picture.image = photo  
 
         
   
   def update_employee(self) -> None:
     self.controller.employee_id = self.employee_id
     self.controller.switch_to_employee_form()
+  
